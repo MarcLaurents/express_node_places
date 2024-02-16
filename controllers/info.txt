@@ -1,0 +1,5 @@
+What is a MVC Structure?
+R: Model View Controler.
+
+What is a Controler?
+R: File that holds the actual logict that should execute when a certain route is reached.

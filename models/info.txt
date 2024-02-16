@@ -1,0 +1,2 @@
+What is a "models" folder?
+R: Models are blueprints/definitions of a data object.
