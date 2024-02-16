@@ -39,6 +39,7 @@ function getPlacesByUserId(req, res, next) {
 
 function createPlace(req, res, next) {
   const errors = validationResult(req)
+
   if (!errors.isEmpty()) {
     console.log(errors)
     return next(
@@ -63,6 +64,7 @@ function createPlace(req, res, next) {
 
 function updatePlaceById(req, res, next) {
   const errors = validationResult(req)
+
   if (!errors.isEmpty()) {
     console.log(errors)
     return next(
