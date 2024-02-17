@@ -6,6 +6,8 @@ const placesController = require('../controllers/places')
 const router = express.Router()
 
 // Midleware Setup
+router.get('/', placesController.getPlaces)
+
 router.get('/:pid', placesController.getPlaceById)
 
 router.get('/user/:uid', placesController.getPlacesByUserId)

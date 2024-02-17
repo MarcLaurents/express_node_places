@@ -1,35 +1,32 @@
 // const uuid = require('uuid')
 const { validationResult } = require('express-validator')
+
 const HttpError = require('../models/http-error')
 const getCoordsForAddress = require('../util/location')
+const MongoDatabase = require('../database/places')
 
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world',
-    location: { lat: 40.7484474, lng: -73.9871516 },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u1'
+async function getPlaces(req, res, next) {
+  try {
+    const places = await MongoDatabase.getPlaces()
+    res.json({ places })
+  } catch (error) {
+    return next(error)
   }
-]
-
-function getPlaceById(req, res, next) {
-  const placeId = req.params.pid
-  const place = DUMMY_PLACES.find(dummyPlace => dummyPlace.id === placeId)
-  if (!place) {
-    return next(
-      new HttpError('Could not found place for the provided id!', 404)
-    )
-  }
-  res.status(200).json({ place })
 }
 
-function getPlacesByUserId(req, res, next) {
-  const userId = new Date()
-  const userPlaces = DUMMY_PLACES.filter(
-    dummyPlace => dummyPlace.creator === userId
-  )
+async function getPlaceById(req, res, next) {
+  try {
+    const placeId = req.params.pid
+    const place = await MongoDatabase.getPlaceById(placeId)
+    res.status(200).json({ place })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+async function getPlacesByUserId(req, res, next) {
+  const userId = req.params.uid
+  const userPlaces = await 
   if (!userPlaces || !userPlaces.length) {
     return next(
       new HttpError('Could not found places for the provided user id!', 404)
@@ -40,50 +37,41 @@ function getPlacesByUserId(req, res, next) {
 
 async function createPlace(req, res, next) {
   const errors = validationResult(req)
-
   if (!errors.isEmpty()) {
     console.log(errors)
     return next(
       new HttpError('Invalid inputs passed, please check your data!', 422)
     )
   }
-
   const { title, description, address, creator } = req.body
   let coordinates
-
   try {
     coordinates = await getCoordsForAddress(address)
+    const createdPlace = {
+      id: 1,
+      title,
+      description,
+      location: coordinates,
+      address,
+      creator
+    }
+    await MongoDatabase.insertPlace(createdPlace)
+    res.status(201).json({ place: createdPlace })
   } catch (error) {
     return next(error)
   }
-
-  const createdPlace = {
-    id: new Date(),
-    title,
-    description,
-    location: coordinates,
-    address,
-    creator
-  }
-
-  DUMMY_PLACES.push(createdPlace)
-
-  res.status(201).json({ place: createdPlace })
 }
 
 function updatePlaceById(req, res, next) {
   const errors = validationResult(req)
-
   if (!errors.isEmpty()) {
     console.log(errors)
     return next(
       new HttpError('Invalid inputs passed, please check your data!', 422)
     )
   }
-
   const { title, description } = req.body
   const placeId = req.params.pid
-
   const updatedPlace = {
     ...DUMMY_PLACES.find(dummyPlace => dummyPlace.id === placeId)
   }
@@ -92,9 +80,7 @@ function updatePlaceById(req, res, next) {
   )
   updatedPlace.title = title
   updatedPlace.description = description
-
   DUMMY_PLACES[placeIndex] = updatedPlace
-
   res.status(200).json({ place: updatedPlace })
 }
 
@@ -108,6 +94,7 @@ function deletePlaceById(req, res, next) {
 }
 
 module.exports = {
+  getPlaces,
   getPlaceById,
   getPlacesByUserId,
   createPlace,

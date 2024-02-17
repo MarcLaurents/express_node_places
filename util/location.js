@@ -1,5 +1,5 @@
-const axios = require('axios')
 require('dotenv').config({ path: 'env/.env' })
+const axios = require('axios')
 const HttpError = require('../models/http-error')
 
 const API_GEOCONDING_URL = process.env.API_GEOCONDING_URL
