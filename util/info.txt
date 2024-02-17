@@ -1,0 +1,1 @@
+encodeURIComponent() function is to remove especial chars and white spaces.

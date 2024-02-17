@@ -1,6 +1,7 @@
 // const uuid = require('uuid')
 const { validationResult } = require('express-validator')
 const HttpError = require('../models/http-error')
+const getCoordsForAddress = require('../util/location')
 
 let DUMMY_PLACES = [
   {
@@ -37,7 +38,7 @@ function getPlacesByUserId(req, res, next) {
   res.status(200).json(userPlaces)
 }
 
-function createPlace(req, res, next) {
+async function createPlace(req, res, next) {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -47,7 +48,15 @@ function createPlace(req, res, next) {
     )
   }
 
-  const { title, description, coordinates, address, creator } = req.body
+  const { title, description, address, creator } = req.body
+  let coordinates
+
+  try {
+    coordinates = await getCoordsForAddress(address)
+  } catch (error) {
+    return next(error)
+  }
+
   const createdPlace = {
     id: new Date(),
     title,
@@ -91,6 +100,9 @@ function updatePlaceById(req, res, next) {
 
 function deletePlaceById(req, res, next) {
   const placeId = req.params.pid
+  if (!DUMMY_PLACES.find(dummyPlace => dummyPlace.id === placeId)) {
+    return next(new HttpError('Could not find a place for that id.', 404))
+  }
   DUMMY_PLACES = DUMMY_PLACES.filter(dummyPlace => dummyPlace.id != placeId)
   res.status(200).json({ message: 'Place deleted!' })
 }
