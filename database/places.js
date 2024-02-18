@@ -29,23 +29,34 @@ async function getPlaceById(id) {
   return places
 }
 
-async function getPlaceByUserId(id)
+async function getPlacesByUserId(id) {
+  await client.connect()
+  const db = client.db()
+  const userPlaces = await db
+    .collection('places')
+    .find({ creator: id })
+    .toArray()
+  if (!userPlaces.length) {
+    const error = new HttpError('Could not find user places in database!', 404)
+    console.log(error)
+    throw error
+  }
+  return userPlaces
+}
 
 async function insertPlace(place) {
-  try {
-    await client.connect()
-    const db = client.db()
-    const result = db.collection('places').insertOne(place)
-    // client.close()
-    return result
-  } catch (error) {
-    console.log(error)
-    return next(new HttpError(error.message, error.status))
+  await client.connect()
+  const db = client.db()
+  const result = await db.collection('places').insertOne(place)
+  if (!result.acknowledged) {
+    return 'errro'
   }
+  return result
 }
 
 module.exports = {
   getPlaces,
   getPlaceById,
-  insertPlace
+  insertPlace,
+  getPlacesByUserId
 }

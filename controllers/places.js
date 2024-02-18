@@ -25,14 +25,13 @@ async function getPlaceById(req, res, next) {
 }
 
 async function getPlacesByUserId(req, res, next) {
-  const userId = req.params.uid
-  const userPlaces = await 
-  if (!userPlaces || !userPlaces.length) {
-    return next(
-      new HttpError('Could not found places for the provided user id!', 404)
-    )
+  try {
+    const userId = req.params.uid
+    const userPlaces = await MongoDatabase.getPlacesByUserId(userId)
+    res.status(200).json({ places: userPlaces })
+  } catch (error) {
+    return next(error)
   }
-  res.status(200).json(userPlaces)
 }
 
 async function createPlace(req, res, next) {
