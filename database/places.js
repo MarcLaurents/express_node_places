@@ -38,7 +38,6 @@ async function getPlacesByUserId(id) {
     .toArray()
   if (!userPlaces.length) {
     const error = new HttpError('Could not find user places in database!', 404)
-    console.log(error)
     throw error
   }
   return userPlaces
@@ -47,11 +46,17 @@ async function getPlacesByUserId(id) {
 async function insertPlace(place) {
   await client.connect()
   const db = client.db()
-  const result = await db.collection('places').insertOne(place)
-  if (!result.acknowledged) {
-    return 'errro'
+  const existentPlace = await db
+    .collection('places')
+    .find({ location: place.location })
+    .toArray()
+  if (existentPlace.length > 0) {
+    const error = new HttpError(
+      'Could not register location, already registered in data base!'
+    )
+    throw error
   }
-  return result
+  await db.collection('places').insertOne(place)
 }
 
 module.exports = {

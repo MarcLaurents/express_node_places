@@ -3,11 +3,11 @@ const { validationResult } = require('express-validator')
 
 const HttpError = require('../models/http-error')
 const getCoordsForAddress = require('../util/location')
-const MongoDatabase = require('../database/places')
+const MongoPlaces = require('../database/places')
 
 async function getPlaces(req, res, next) {
   try {
-    const places = await MongoDatabase.getPlaces()
+    const places = await MongoPlaces.getPlaces()
     res.json({ places })
   } catch (error) {
     return next(error)
@@ -17,7 +17,7 @@ async function getPlaces(req, res, next) {
 async function getPlaceById(req, res, next) {
   try {
     const placeId = req.params.pid
-    const place = await MongoDatabase.getPlaceById(placeId)
+    const place = await MongoPlaces.getPlaceById(placeId)
     res.status(200).json({ place })
   } catch (error) {
     return next(error)
@@ -27,7 +27,7 @@ async function getPlaceById(req, res, next) {
 async function getPlacesByUserId(req, res, next) {
   try {
     const userId = req.params.uid
-    const userPlaces = await MongoDatabase.getPlacesByUserId(userId)
+    const userPlaces = await MongoPlaces.getPlacesByUserId(userId)
     res.status(200).json({ places: userPlaces })
   } catch (error) {
     return next(error)
@@ -54,13 +54,14 @@ async function createPlace(req, res, next) {
       address,
       creator
     }
-    await MongoDatabase.insertPlace(createdPlace)
+    await MongoPlaces.insertPlace(createdPlace)
     res.status(201).json({ place: createdPlace })
   } catch (error) {
     return next(error)
   }
 }
 
+// TODO: MIGRATE TO MONGODB!!!
 function updatePlaceById(req, res, next) {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
