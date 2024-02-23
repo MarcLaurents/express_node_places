@@ -20,7 +20,7 @@ async function getPlaces() {
 async function getPlaceById(id) {
   await client.connect()
   const db = client.db()
-  const places = await db.collection('places').find({ id }).toArray()
+  const places = await db.collection('places').find({ id })
   if (!places.length) {
     const error = new HttpError('Could not find places in database!', 404)
     console.log(error)
@@ -49,8 +49,7 @@ async function insertPlace(place) {
   const existentPlace = await db
     .collection('places')
     .find({ location: place.location })
-    .toArray()
-  if (existentPlace.length > 0) {
+  if (existentPlace) {
     const error = new HttpError(
       'Could not register location, already registered in data base!'
     )
@@ -59,9 +58,24 @@ async function insertPlace(place) {
   await db.collection('places').insertOne(place)
 }
 
+async function updatePlace(place) {
+  await client.connect()
+  const db = client.db()
+  const placetoUpdate = await db.collection('places').find({ id: place.pid })
+  if (!placetoUpdate) {
+    const error = new HttpError('Could not find place with provided id!')
+    throw error
+  }
+  placetoUpdate.description = place.description
+  placetoUpdate.title = place.title
+  await client.close()
+  return place
+}
+
 module.exports = {
   getPlaces,
   getPlaceById,
   insertPlace,
-  getPlacesByUserId
+  getPlacesByUserId,
+  updatePlace
 }

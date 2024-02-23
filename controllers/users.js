@@ -1,6 +1,5 @@
 // const uuid = require('uuid')
 const validate = require('../validations/inputs')
-const HttpError = require('../models/http-error')
 const MongoUsers = require('../database/users')
 
 async function getUsers(req, res, next) {

@@ -1,7 +1,7 @@
 // const uuid = require('uuid')
 const { validationResult } = require('express-validator')
 
-const HttpError = require('../models/http-error')
+const validate = require('../validations/inputs')
 const getCoordsForAddress = require('../util/location')
 const MongoPlaces = require('../database/places')
 
@@ -35,16 +35,10 @@ async function getPlacesByUserId(req, res, next) {
 }
 
 async function createPlace(req, res, next) {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    console.log(errors)
-    return next(
-      new HttpError('Invalid inputs passed, please check your data!', 422)
-    )
-  }
-  const { title, description, address, creator } = req.body
-  let coordinates
   try {
+    validate.inputs(req)
+    const { title, description, address, creator } = req.body
+    let coordinates
     coordinates = await getCoordsForAddress(address)
     const createdPlace = {
       id: 1,
@@ -61,27 +55,15 @@ async function createPlace(req, res, next) {
   }
 }
 
-// TODO: MIGRATE TO MONGODB!!!
-function updatePlaceById(req, res, next) {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    console.log(errors)
-    return next(
-      new HttpError('Invalid inputs passed, please check your data!', 422)
-    )
+async function updatePlaceById(req, res, next) {
+  try {
+    validate.inputs(req)
+    const newPlace = req.body
+    const updatedPlace = await MongoPlaces.updatePlace(newPlace)
+    res.status(200).json({ place: updatedPlace })
+  } catch (error) {
+    return next(error)
   }
-  const { title, description } = req.body
-  const placeId = req.params.pid
-  const updatedPlace = {
-    ...DUMMY_PLACES.find(dummyPlace => dummyPlace.id === placeId)
-  }
-  const placeIndex = DUMMY_PLACES.findIndex(
-    dummyPlace => dummyPlace.id === placeId
-  )
-  updatedPlace.title = title
-  updatedPlace.description = description
-  DUMMY_PLACES[placeIndex] = updatedPlace
-  res.status(200).json({ place: updatedPlace })
 }
 
 function deletePlaceById(req, res, next) {
