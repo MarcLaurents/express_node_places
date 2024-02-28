@@ -8,7 +8,7 @@ const MongoPlaces = require('../database/places')
 async function getPlaces(req, res, next) {
   try {
     const places = await MongoPlaces.getPlaces()
-    res.json({ places })
+    res.status(201).json({ places })
   } catch (error) {
     return next(error)
   }
@@ -66,6 +66,8 @@ async function updatePlaceById(req, res, next) {
   }
 }
 
+
+// TODO: To request in database!
 function deletePlaceById(req, res, next) {
   const placeId = req.params.pid
   if (!DUMMY_PLACES.find(dummyPlace => dummyPlace.id === placeId)) {
