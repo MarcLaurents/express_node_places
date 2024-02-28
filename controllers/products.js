@@ -23,14 +23,15 @@ async function getProduct(req, res, next) {
     }
 }
 
+// TODO: Add req validations!
 async function createProduct(req, res, next) {
     try {
-        const { name, brand, time, size, price } = req.params
+        const { name, brand, store, size, price } = req.params
         const createdProduct = {
             id: uuid(),
             name, 
             brand, 
-            time, 
+            store, 
             size, 
             price
         }
@@ -41,13 +42,25 @@ async function createProduct(req, res, next) {
     }
 }
 
-// TODO: implement database!
-async function deleteProduct(req, res, next) {
+async function updateProduct(req, res, next) {
     try {
-        
+        const updatedProduct = req.params
+        await MongoProducts.updateProduct(body)
+        res.status(201).json({ product: updatedProduct })
     } catch (error) {
-        
+        return next(error)
     }
 }
 
-module.exports = { getProducts, getProduct, createProduct }
+// TODO: implement database!
+async function deleteProduct(req, res, next) {
+    try {
+        const id = req.params.pid
+        await MongoProducts.deleteProduct(id)
+        res.status(201).json({message: `Product id ${id} deleted successefuly!`})
+    } catch (error) {
+        return next(error)
+    }''
+}
+
+module.exports = { getProducts, getProduct, createProduct, updateProduct, deleteProduct }
