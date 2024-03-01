@@ -16,7 +16,7 @@ async function singup(req, res, next) {
     validate.inputs(req)
     const { name, email, password } = req.body
     const createdUser = {
-      id: new Date(),
+      id: 1,
       name,
       email,
       password

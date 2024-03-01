@@ -8,12 +8,13 @@ const router = express.Router()
 // Midleware Setup
 router.get('/', usersController.getUsers)
 
+// TODO: Check why validation is breaking!!!
 router.post(
   '/singup',
   [
     check('name').not().isEmpty(),
     check('email').normalizeEmail().isEmail(),
-    check('password').not().isEmpty().isLength({ min: 6 })
+    check('password').isLength({ min: 5 })
   ],
   usersController.singup
 )

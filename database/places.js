@@ -20,13 +20,12 @@ async function getPlaces() {
 async function getPlaceById(id) {
   await client.connect()
   const db = client.db()
-  const places = await db.collection('places').find({ id })
-  if (!places.length) {
+  const place = await db.collection('places').findOne({ id })
+  if (!place) {
     const error = new HttpError('Could not find places in database!', 404)
-    console.log(error)
     throw error
   }
-  return places
+  return place
 }
 
 async function getPlacesByUserId(id) {
@@ -48,7 +47,7 @@ async function insertPlace(place) {
   const db = client.db()
   const existentPlace = await db
     .collection('places')
-    .find({ location: place.location })
+    .findOne({ location: place.location })
   if (existentPlace) {
     const error = new HttpError(
       'Could not register location, already registered in data base!'

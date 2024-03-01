@@ -33,7 +33,9 @@ async function getUser({ email, password }) {
 async function insertUser(user) {
   await client.connect()
   const db = client.db()
-  const existentUser = await db.collection('users').find({ email: user.email })
+  const existentUser = await db
+    .collection('users')
+    .findOne({ email: user.email })
   if (existentUser) {
     const error = new HttpError('Email already registered in database!')
     throw error

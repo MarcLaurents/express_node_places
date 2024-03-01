@@ -1,6 +1,4 @@
 // const uuid = require('uuid')
-const { validationResult } = require('express-validator')
-
 const validate = require('../validations/inputs')
 const getCoordsForAddress = require('../util/location')
 const MongoPlaces = require('../database/places')
@@ -16,7 +14,7 @@ async function getPlaces(req, res, next) {
 
 async function getPlaceById(req, res, next) {
   try {
-    const placeId = req.params.pid
+    const placeId = Number(req.params.pid)
     const place = await MongoPlaces.getPlaceById(placeId)
     res.status(200).json({ place })
   } catch (error) {
@@ -65,7 +63,6 @@ async function updatePlaceById(req, res, next) {
     return next(error)
   }
 }
-
 
 // TODO: To request in database!
 function deletePlaceById(req, res, next) {
